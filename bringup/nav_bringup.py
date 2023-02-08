@@ -24,7 +24,7 @@ def run_server(port):
     sock.listen(1)
     print("MARRtino navigation server started on port %d ..." %port)
 
-    tmux = TmuxSend('bringup', ['loc','nav','obst','laser','rviz'])
+    tmux = TmuxSend('bringup', ['loc','nav','obst','laser','rviz','people'])
 
     connected = False
     dorun = True
@@ -101,6 +101,11 @@ def run_server(port):
                     tmux.cmd(4,'rosrun rviz rviz -d nav.rviz')
                 elif data=='@rvizkill':
                     tmux.Cc(4)
+                elif data=='@peopletracking':
+                    tmux.cmd(5,'cd %s' %nfolder)
+                    tmux.cmd(5,'roslaunch leg_detector.launch')
+                elif data=='@peopletrackingkill':
+                    tmux.Cc(5)
                 else:
                     print('Unknown command %s')
 

@@ -1,4 +1,4 @@
-# CoHAN planner
+# CoHAN planner + laser leg_detector and people tracking
 # new version  https://github.com/sphanit/cohan_planner_multi.git
 # old version  https://github.com/sphanit/CoHAN_Planner
 
@@ -9,7 +9,7 @@ USER root
 # Install the requirements
 
 RUN apt update && \
-    apt install -y python-pip python-catkin-tools
+    apt install -y python-pip python-catkin-tools ros-melodic-mbf-msgs
 
 USER robot
 
@@ -19,24 +19,25 @@ RUN pip install scipy
 RUN cd 	~/src && \
     git clone https://github.com/sphanit/cohan_planner_multi.git -b model && \
     cd cohan_planner_multi && \
-    git submodule update --init --recursive
+    git submodule update --init --recursive && \
+    cd 	~/src && \
+    git clone https://github.com/wg-perception/people.git -b melodic && \
+    git clone https://github.com/DLu/laser_filtering.git 
 
 
+
+#  https://github.com/sphanit/CoHAN_Navigation.git
 #  This package contains simulators, examples and a lot of stuff not really needed
 #  Can be useful for testing, not linked to ROS workspace as it uses different setups
 #  and have different requirements with respect to MARRtino robot
 
-RUN cd 	~/src && \
-    git clone https://github.com/sphanit/CoHAN_Navigation.git -b multi && \
-    cd ..
 
 USER root
 
-RUN apt update
-
 # Install the dependencies using rosdep
-RUN cd 	/home/robot/src/cohan_planner_multi && \
-    rosdep install --from-paths . --ignore-src --rosdistro=melodic -y
+RUN cd 	/home/robot/src/ && \
+    rosdep install --from-paths ./cohan_planner_multi --ignore-src --rosdistro=melodic -y && \
+    rosdep install --from-paths ./people --ignore-src --rosdistro=melodic -y
 
 # Clean the installation folder
 RUN apt-get clean && \
@@ -46,7 +47,9 @@ USER robot
 
 # Link to workspace
 RUN cd 	~/ros/catkin_ws/src && \
-    ln -s ~/src/cohan_planner_multi .
+    ln -s ~/src/cohan_planner_multi . && \
+    ln -s ~/src/people . && \
+    ln -s ~/src/laser_filtering/map_laser .
 
 # Build
 RUN cd 	~/ros/catkin_ws && \

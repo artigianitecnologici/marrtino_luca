@@ -99,6 +99,9 @@ def autostart(config, dostart):
     if getconfig('functions','mapping_rviz'):
         cmd = '@rviz' if dostart else '@rvizkill'
         systemcmd(cmd,9241)
+    if getconfig('functions','people_tracking'):
+        cmd = '@peopletracking' if dostart else '@peopletrackingkill'
+        systemcmd(cmd,9238)
 
     if getconfig('functions','videoserver'):
         cmd = '@videoserver' if dostart else '@videoserverkill'
