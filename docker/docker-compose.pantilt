@@ -1,0 +1,16 @@
+  pantilt:
+    image: marrtino:pantilt
+    build:
+      context: $MARRTINO_APPS_HOME/docker
+      dockerfile: Dockerfile.pantilt
+    container_name: pantilt
+    privileged: true
+    dns: 8.8.8.8
+    network_mode: "host"
+    tty: true
+    environment:
+    - ROS_IP=$ROS_IP
+    - ROBOT_TYPE=$ROBOT_TYPE
+    volumes:
+    - /dev:/dev
+    - $MARRTINO_APPS_HOME:/home/robot/src/marrtino_apps

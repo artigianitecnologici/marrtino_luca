@@ -23,7 +23,7 @@ try:
 except:
   print("Cannot import numpy")
 
-from std_msgs.msg import String
+from std_msgs.msg import String,Float64
 from geometry_msgs.msg import Twist, Quaternion, Pose, PoseWithCovarianceStamped
 from sensor_msgs.msg import LaserScan, Range, Image, Joy
 from control_msgs.msg import JointJog
@@ -55,6 +55,7 @@ assock = None
 
 use_robot = True
 use_audio = True
+use_social = True
 
 robot_initialized = False
 stop_request = False
@@ -77,7 +78,17 @@ TOPIC_desired_cmd_vel = 'desired_cmd_vel'
 TOPIC_odom = 'odom'
 TOPIC_joints = 'cmd_joints_jog'
 TOPIC_joy = 'joy'
-
+# SOCIAL
+TOPIC_emotion = "social/emotion"
+TOPIC_pan = "pan_controller/command"
+TOPIC_tilt = "tilt_controller/command"
+TOPIC_spalla_dx_rot = "/spalladx_controller/command"
+TOPIC_spalla_dx_fle = "/spalladxj_controller/command"
+TOPIC_gomito_dx = "/gomitodx_controller/command"
+TOPIC_spalla_sx_rot = "/spallasx_controller/command"
+TOPIC_spalla_sx_fle = "/spallasxj_controller/command"
+TOPIC_gomito_sx = "/gomitosx_controller/command"
+#eof social
 ACTION_move_base = 'move_base'
 TOPIC_sonar_0 = 'sonar_0' 
 TOPIC_sonar_1 = 'sonar_1'
@@ -164,12 +175,15 @@ def setMaxSpeed(x,r):
     tv_good=x
     rv_good=r
 
-
+#SOCIAL
 def setRobotNamePrefix(prefix):
     global TOPIC_tag_detections,TOPIC_scan,TOPIC_amcl_pose,TOPIC_cmd_vel,TOPIC_desired_cmd_vel, \
            TOPIC_odom,TOPIC_joy,TOPIC_joints,ACTION_move_base, \
            TOPIC_sonar_0,TOPIC_sonar_1,TOPIC_sonar_2,TOPIC_sonar_3, \
-           TOPIC_GROUND_TRUTH, TOPIC_SETPOSE, TOPIC_STAGESAY
+           TOPIC_GROUND_TRUTH, TOPIC_SETPOSE, TOPIC_STAGESAY, \
+           TOPIC_emotion, TOPIC_pan, TOPIC_tilt, \
+           TOPIC_spalla_dx_rot ,TOPIC_spalla_dx_fle,TOPIC_gomito_dx , \
+           TOPIC_spalla_sx_rot ,TOPIC_spalla_sx_fle,TOPIC_gomito_sx 
 
     TOPIC_tag_detections = prefix+'/' + TOPIC_tag_detections
     TOPIC_scan = prefix+'/'+TOPIC_scan
@@ -184,6 +198,19 @@ def setRobotNamePrefix(prefix):
     TOPIC_sonar_1 = prefix+'/'+TOPIC_sonar_1
     TOPIC_sonar_2 = prefix+'/'+TOPIC_sonar_2
     TOPIC_sonar_3 = prefix+'/'+TOPIC_sonar_3
+    #SOCIAL
+    TOPIC_emotion = prefix+'/'+TOPIC_emotion
+    TOPIC_pan = prefix+'/'+TOPIC_pan
+    TOPIC_tilt = prefix+'/'+TOPIC_tilt
+
+    TOPIC_spalla_dx_rot = prefix+'/'+ TOPIC_spalla_dx_rot
+    TOPIC_spalla_dx_fle = prefix+'/'+ TOPIC_spalla_dx_fle
+    TOPIC_gomito_dx = prefix+'/'+ TOPIC_gomito_dx 
+    TOPIC_spalla_sx_rot = prefix+'/'+ TOPIC_spalla_sx_rot
+    TOPIC_spalla_sx_fle = prefix+'/'+ TOPIC_spalla_sx_fle
+    TOPIC_gomito_sx = prefix+'/'+TOPIC_gomito_sx 
+    #eof social
+
     TOPIC_GROUND_TRUTH = prefix+'/'+TOPIC_GROUND_TRUTH
     TOPIC_SETPOSE = prefix+'/'+TOPIC_SETPOSE 
     TOPIC_STAGESAY = prefix+'/'+TOPIC_STAGESAY
@@ -359,6 +386,17 @@ sonar_sub_2 = None
 sonar_sub_3 = None
 stage_setpose_pub = None # Stage setpose (needs stagerosPeople)
 stage_say_pub = None # Stage say (needs stagerosPeople)
+# SOCIAL Fabio 05/12/2021
+emotion_pub = None
+pan_pub = None
+titl_pub = None
+spalla_dx_rot_pub = None 
+spalla_dx_fle_pub = None
+gomito_dx_pub = None
+spalla_sx_rot_pub = None
+spalla_sx_fle_pub = None
+gomito_sx_pub  = None
+# eof social
 
 
 # ROS Callback functions
@@ -538,7 +576,10 @@ def begin(nodename='robot_cmd', init_node=True):
            sonar_sub_0, sonar_sub_1, sonar_sub_2, sonar_sub_3, \
            stage_say_pub, stage_setpose_pub, \
            odom_robot_pose, robot_initialized, stop_request, \
-           use_robot, use_audio, audio_connected
+           use_robot, use_audio, audio_connected,\
+           emotion_pub ,  pan_pub , tilt_pub,\
+           spalla_dx_rot_pub,spalla_dx_fle_pub,gomito_dx_pub, \
+           spalla_sx_rot_pub,spalla_sx_fle_pub,gomito_sx_pub  
 
     print('begin')
 
@@ -582,6 +623,8 @@ def begin(nodename='robot_cmd', init_node=True):
     FIX_sub = rospy.Subscriber(TOPIC_FIX, NavSatFix,     FIX_cb)
     MAG_sub = rospy.Subscriber(TOPIC_MAG, MagneticField, MAG_cb)
     ILL_sub = rospy.Subscriber(TOPIC_ILL, Illuminance,   ILL_cb)
+    # SOCIAL
+   
 
     if (use_robot):
         print("Robot enabled")
@@ -592,6 +635,19 @@ def begin(nodename='robot_cmd', init_node=True):
         joints_pub = rospy.Publisher(TOPIC_joints, JointJog, queue_size=1)
         stage_setpose_pub = rospy.Publisher(TOPIC_SETPOSE, Pose, queue_size=1, latch=True)
         stage_say_pub = rospy.Publisher(TOPIC_STAGESAY, String, queue_size=1,   latch=True)
+        #SOCIAL
+        print("Enable Social publisher")
+        emotion_pub = rospy.Publisher(TOPIC_emotion, String, queue_size=1,   latch=True)
+        pan_pub = rospy.Publisher(TOPIC_pan, Float64, queue_size=1,   latch=True)
+        tilt_pub = rospy.Publisher(TOPIC_tilt, Float64, queue_size=1,   latch=True)
+        # 
+        spalla_dx_rot_pub = rospy.Publisher(TOPIC_spalla_dx_rot, Float64, queue_size=1,   latch=True)
+        spalla_dx_fle_pub = rospy.Publisher(TOPIC_spalla_dx_fle, Float64, queue_size=1,   latch=True)
+        gomito_dx_pub = rospy.Publisher(TOPIC_gomito_dx, Float64, queue_size=1,   latch=True) 
+        spalla_sx_rot_pub = rospy.Publisher(TOPIC_spalla_sx_rot, Float64, queue_size=1,   latch=True)
+        spalla_sx_fle_pub = rospy.Publisher(TOPIC_spalla_sx_fle, Float64, queue_size=1,   latch=True)
+        gomito_sx_pub = rospy.Publisher(TOPIC_gomito_sx, Float64, queue_size=1,   latch=True)
+	# eof Social
 
         timeout = 3 #seconds
         print("Waiting for robot pose on topic %s... (%d seconds)" %(TOPIC_odom,timeout))
@@ -1044,7 +1100,87 @@ def wait(r=1):
             print("wait ... %f < %f  %r  %r " %(t,r, stop_request, e))
         return e
 
+#### SOCIAL ####
+################
 
+def head_status(msg):
+    print('social/emotion %s' %(msg))
+
+def emotion(msg):
+    #
+    print('social/emotion %s' %(msg))
+    emotion_pub.publish(msg)
+
+
+def spalla_rotazione_dx(msg):
+    # valori da -0.5  0 0.5 
+    print('spalla_rotazione_dx: %s' %(msg))
+    spalla_dx_rot_pub.publish(msg)
+
+def spalla_flessione_dx(msg):
+    #
+    print('spalla_flessione_dx: %s' %(msg))
+    spalla_dx_fle_pub.publish(msg)
+
+def gomito_dx(msg):
+    #
+    print('gomito_dx: %s' %(msg))
+    gomito_dx_pub.publish(msg)
+
+
+def spalla_rotazione_sx(msg):
+    # valori da -0.5  0 0.5 
+    print('spalla_rotazione_sx: %s'  %(msg))
+    spalla_sx_rot_pub.publish(msg)
+
+def spalla_flessione_sx(msg):
+    #
+    print('spalla_flessione_sx: %s'  %(msg))
+    spalla_sx_fle_pub.publish(msg)
+
+def gomito_sx(msg):
+    #
+    print('gomito_sx: %s' %(msg))
+    gomito_sx_pub.publish(msg)
+
+
+def pan(msg):
+    # valori da -0.5  0 0.5 
+    print('Pan Position: %s' %(msg))
+    pan_pub.publish(msg)
+
+def tilt(msg):
+    #
+    print('Tilt Position: %s' %(msg))
+    tilt_pub.publish(msg)
+
+def head_position(msg):
+    print('Head : %s' %(msg))
+    if (msg == 'front'):
+        pan_pub.publish(0)
+        tilt_pub.publish(0)
+    if (msg == 'left'):
+        pan_pub.publish(0.5)
+        tilt_pub.publish(0)
+    if (msg == 'right'):
+        pan_pub.publish(-0.5)
+        tilt_pub.publish(0)
+    if (msg == 'down'):
+        pan_pub.publish(0)
+        tilt_pub.publish(0.5)
+    if (msg == 'up'):
+        pan_pub.publish(0)
+        tilt_pub.publish(-0.5)
+
+def user_say():
+    print('user_say')
+    retval = asr()
+    return retval
+    
+
+# EOF Social
+###############
+    
 # Sounds
 
 def sound(name):

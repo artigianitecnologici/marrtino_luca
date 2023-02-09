@@ -261,7 +261,14 @@ ROS topics:
 <td><button id="rplidar_start_btn" onclick="send_cmd('rplidar_start')" class="btn waves-effect waves-light blue">RPlidar laser start</button></td>
 <td><button id="rplidar_quit_btn" onclick="send_cmd('rplidar_kill')" class="btn waves-effect waves-light blue">RPlidar laser quit</button></td>
 </tr>
-
+<!--
+<tr height=40>
+  <td width=60>LD06</td> 
+  <td width=80 align='center'><span id="ld06_status" style="color: red;">OFF</span></td>
+  <td><button id="ld06_start_btn" onclick="send_cmd('ld06_start')" class="btn waves-effect waves-light blue">LD06 laser start</button></td>
+  <td><button id="ld06_quit_btn" onclick="send_cmd('ld06_kill')" class="btn waves-effect waves-light blue">LD06 laser quit</button></td>
+</tr>
+-->
 <tr height=40>
 <td width=60>Astra</td> 
 <td width=80 align='center'><span id="astralaser_status" style="color: red;">OFF</span></td>
@@ -318,6 +325,22 @@ ROS topics:
 <td><button id="joystick4wd_start_btn" onclick="send_cmd('joystick4wd_start')" class="btn waves-effect waves-light blue">Joystick 4WD start</button></td>
 <td><button id="joystick4wd_quit_btn" onclick="send_cmd('joystick4wd_kill')" class="btn waves-effect waves-light blue">Joystick 4WD quit</button></td>
 </tr>
+
+</table>
+<br>
+<hr>
+<h3> Dynamixel  </h3>
+
+<table>
+
+<tr height=40>
+<td width=100>Pan & Tilt</td> 
+<td width=80 align='center'><span id="joystick_status" style="color: red;">OFF</span></td>
+<td><button id="pantilt_start_btn" onclick="send_cmd('pantilt_start')" class="btn waves-effect waves-light blue">Pan & Tilt start</button></td>
+<td><button id="pantilt_quit_btn" onclick="send_cmd('pantilt_kill')" class="btn waves-effect waves-light blue">Pan & Tilt quit</button></td>
+</tr>
+
+
 
 </table>
 

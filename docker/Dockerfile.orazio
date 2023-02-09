@@ -13,7 +13,7 @@ USER root
 
 RUN apt update && \
     apt install -y \
-        tmux less sudo nano wget iputils-ping net-tools htop \
+        tmux less sudo nano wget iputils-ping net-tools htop libyaml-cpp-dev \
         arduino arduino-mk libreadline-dev libwebsockets-dev libeigen3-dev \
         ros-melodic-control-msgs ros-melodic-tf ros-melodic-tf2 && \
     apt-get clean && \

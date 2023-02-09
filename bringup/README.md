@@ -47,6 +47,7 @@ Run the bringup servers
         python map_bringup.py -server_port 9241
         python objrec_bringup.py -server_port 9242
 
+        python teleop_bringup.py -server_port 9249
         ... social  9250
 
 
@@ -74,6 +75,7 @@ Send commands to bringup servers
 
         echo '@hokuyo' | netcat -w 1 localhost 9238
         echo '@rplidar' | netcat -w 1 localhost 9238
+        echo '@ld06' | netcat -w 1 localhost 9238
         echo '@laserkill' | netcat -w 1 localhost 9238
         echo '@loc' | netcat -w 1 localhost 9238
         echo '@lockill' | netcat -w 1 localhost 9238

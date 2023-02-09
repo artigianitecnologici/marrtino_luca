@@ -1,0 +1,10 @@
+servomaxx: 0.5   #max degree servo horizontal (x) can turn
+servomaxy: 1.0   #max degree servo vertical (y) can turn
+servomin: -0.5   # Min degree servo horizontal (x) can turn
+screenmaxx: 640   #max screen horizontal (x)resolution
+screenmaxy: 480   #max screen vertical (y)resolution
+center_offset: 25  #offset pixels from actual center to right and left
+step_distancex: 0.03 #x servo rotation steps 0.03 ( velocita' di rotazione ) 
+step_distancey: 0.03 #y servo rotation steps
+
+
