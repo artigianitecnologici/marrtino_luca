@@ -1,0 +1,52 @@
+# Docker file for MARRtino Pan & Tilt
+# Fabio Ferrarini , 22/01/2023
+
+# docker build -t marrtino:pantilt -f Dockerfile.pantilt .
+
+FROM marrtino:system
+
+ARG MACHTYPE=default
+
+# System libs
+
+USER root
+RUN apt-get update && \
+    apt-get install -y \
+        v4l-utils  \
+        ros-melodic-rgbd-launch ros-melodic-web-video-server \
+        ros-melodic-camera-info-manager ros-melodic-libuvc \
+        ros-melodic-image-view ros-melodic-rosbridge-server  && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+
+
+USER robot
+
+RUN mkdir -p $HOME/src/dynamixel &&  cd $HOME/src/dynamixel && \
+    git clone https://github.com/ROBOTIS-GIT/dynamixel-workbench.git && \
+    git clone https://github.com/ROBOTIS-GIT/dynamixel-workbench-msgs.git && \
+    git clone https://github.com/ROBOTIS-GIT/DynamixelSDK.git && \
+    git clone https://github.com/arebgun/dynamixel_motor.git
+
+
+RUN cd $HOME/ros/catkin_ws/src && \
+    ln -s $HOME/src/dynamixel . && \
+    ln -s $HOME/src/dynamixel_motor/ . 
+
+
+RUN bash -ci "cd $HOME/ros/catkin_ws; catkin_make -j1"
+
+# Trick to force build from here
+
+RUN echo "20210426" > /tmp/lastdockerbuild
+
+# marrtino_apps
+  
+RUN cd $HOME/src && git clone --depth 1 https://bitbucket.org/iocchi/marrtino_apps.git
+
+WORKDIR /home/robot
+
+CMD [ "/bin/bash", "-ci", "cd ~/src/marrtino_apps/bringup && python pantilt_bringup.py" ]
+
+
