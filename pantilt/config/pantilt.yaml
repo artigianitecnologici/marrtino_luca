@@ -6,7 +6,7 @@ pan_controller:
     joint_name: pan_joint
     joint_speed: 0.20
     motor:
-        id: 2
+        id: 0
         init: 512
         min: 316
         max: 708

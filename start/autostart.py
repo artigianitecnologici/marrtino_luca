@@ -115,8 +115,11 @@ def autostart(config, dostart):
     if getconfig('functions','social'):
         cmd = '@social' if dostart else '@socialkill'
         systemcmd(cmd,9250)
+    if getconfig('functions','pantilt'):
+        cmd = '@pantilt_start' if dostart else '@pantilt_kill'
+        systemcmd(cmd,9249)
 
-
+#
 
 # Use python autostart.py [start.yaml file] [--kill]
 

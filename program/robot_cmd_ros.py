@@ -647,7 +647,7 @@ def begin(nodename='robot_cmd', init_node=True):
         spalla_sx_rot_pub = rospy.Publisher(TOPIC_spalla_sx_rot, Float64, queue_size=1,   latch=True)
         spalla_sx_fle_pub = rospy.Publisher(TOPIC_spalla_sx_fle, Float64, queue_size=1,   latch=True)
         gomito_sx_pub = rospy.Publisher(TOPIC_gomito_sx, Float64, queue_size=1,   latch=True)
-	# eof Social
+	    # eof Social
 
         timeout = 3 #seconds
         print("Waiting for robot pose on topic %s... (%d seconds)" %(TOPIC_odom,timeout))

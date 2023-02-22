@@ -182,6 +182,12 @@ def writeout(config, arch, gpu):
                 replacemap["runtime: runc"] = "    runtime: nvidia"
             addservice(f,'objrec',None,replacemap)
 
+        if config['functions']['pantilt']:
+            replacemap = {}
+            if gpu!=None:
+                replacemap["runtime: runc"] = "    runtime: nvidia"
+            addservice(f,'pantilt',None,replacemap)
+
         if config['functions']['social']:
             os.system('touch /tmp/marrtinosocialon') 
             # used by start_docker.bash / system_update.bash

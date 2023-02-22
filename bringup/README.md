@@ -47,9 +47,11 @@ Run the bringup servers
         python map_bringup.py -server_port 9241
         python objrec_bringup.py -server_port 9242
 
-        python teleop_bringup.py -server_port 9249
-        ... social  9250
+        python r3d_bringup.py -server_port 9248 
+        python pantilt_bringup.py -server_port 9249
 
+        ... social  9250
+        
 
 Send commands to bringup servers
 
@@ -103,7 +105,10 @@ Send commands to bringup servers
         echo '@joystick' | netcat -w 1 localhost 9240
         echo '@joystick4wd' | netcat -w 1 localhost 9240
         echo '@joystickkill' | netcat -w 1 localhost 9240
-
+        # pan & tilt
+        echo '@pantilt_start' | netcat -w 1 localhost 9249
+        echo '@pantilt_kill' | netcat -w 1 localhost 9249
+        # Social 
         echo '@social' | netcat -w 1 localhost 9250
         echo '@socialkill' | netcat -w 1 localhost 9250
         echo '@robot_social' | netcat -w 1 localhost 9250
@@ -111,4 +116,4 @@ Send commands to bringup servers
         echo '@tracker' | netcat -w 1 localhost 9250
         echo '@trackerkill' | netcat -w 1 localhost 9250
 
-
+ 
