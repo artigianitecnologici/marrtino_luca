@@ -228,7 +228,7 @@ def readSonarValue(i):
 
     if sonarcount > 0:
         return sonarvalues[i]
-    else
+    else:
         return -1
 
 # Laser
