@@ -153,8 +153,11 @@ def check_odom():
             odom_sub = rospy.Subscriber('odom', Odometry, odom_cb)
             odomcount = 0
             trycount = 0
-            dt = 0.2
             tott = 0
+            dt = 1.0
+            rospy.sleep(dt)
+            tott += dt
+            dt = 0.2
             while odomcount == 0 and trycount<5:
                 rospy.sleep(dt)
                 tott += dt
@@ -256,7 +259,7 @@ def check_laser():
         lasercount = 0
         trycount = 0
         tott = 0
-        dt = 0.5
+        dt = 1.0
         rospy.sleep(dt)
         tott += dt
         dt = 0.2
