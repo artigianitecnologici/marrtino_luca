@@ -648,20 +648,20 @@ sub_image = None
 def startCameraGrabber():
     global sub_image, cvimage
     img_topic = autoImageTopic()
-    if img_topic != None:
+    if img_topic is not None:
         print("Image topic: %s" %img_topic)
         sub_image = rospy.Subscriber(img_topic, Image, image_cb)
         time.sleep(1)
-        if cvimage == None: # first time can take a lot to get the image
+        if cvimage is None: # first time can take a lot to get the image
             time.sleep(3)
-        if cvimage == None:
+        if cvimage is None:
             time.sleep(3)
-        if cvimage == None:
+        if cvimage is None:
             print("Image not received!!!")
 
 def stopCameraGrabber():
     global sub_image
-    if sub_image !=  None:
+    if sub_image is not  None:
         sub_image.unregister()
 
 
