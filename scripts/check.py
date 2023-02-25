@@ -155,12 +155,12 @@ def check_odom():
             trycount = 0
             dt = 0.2
             tott = 0
-            while odomcount == 0 and trycount<15:
+            while odomcount == 0 and trycount<5:
                 rospy.sleep(dt)
                 tott += dt
-                trycount += 1
+                trycount += dt
             odom_sub.unregister()
-            odomrate = odomcount/tott
+            odomrate = round(odomcount/tott,2)
             print('  -- Odometry rate = %.2f Hz' %(odomrate))
             print('  -- Odometry frame = %s' %(odomframe))
         except Exception as e:
@@ -202,7 +202,7 @@ def check_sonar():
                 while sonarcount == 0 and trycount<5:
                     rospy.sleep(dt)
                     tott += dt
-                    trycount += 1
+                    trycount += dt
                 sonar_sub.unregister()
                 if sonarcount>0:
                     print('  -- Sonar %d scan rate = %.2f Hz' %(i,sonarcount/tott))
@@ -256,12 +256,17 @@ def check_laser():
     r = ['/scan', 'sensor_msgs/LaserScan'] in topicnames
     
     if r:
-        lasercount = 0
         laser_sub = rospy.Subscriber('scan', LaserScan, laser_cb)
-        dt = 5.0
-        time.sleep(dt)
+        lasercount = 0
+        trycount = 0
+        dt = 0.2
+        tott = 0
+        while lasercount == 0 and trycount<5:
+            rospy.sleep(dt)
+            tott += dt
+            trycount += dt
         laser_sub.unregister()
-        laserrate = lasercount/dt
+        laserrate = round(lasercount/dt,2)
         print('  -- Laser scan rate = %.2f Hz' %(laserrate))
         print('  -- Laser frame = %s' %(laserframe))
 
