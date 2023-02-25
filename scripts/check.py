@@ -168,10 +168,10 @@ sonarvalues = [0,0,0,0,0,0,0,0]
 idsonar = 0
 
 def sonar_cb(data):
-    global sonarcount, sonarframe, idsonar
+    global sonarcount, sonarframe, sonarvalues, idsonar
     sonarcount += 1
     sonarframe = data.header.frame_id
-    r = (data.range*0.75)/0.265 #scale the value of the range in meters
+    r = data.range  # ??? *0.75)/0.265 #scale the value of the range in meters
     sonarvalues[idsonar] = r
 
 def check_sonar():
@@ -184,9 +184,11 @@ def check_sonar():
         idsonar = i
         if ['/'+sname, 'sensor_msgs/Range'] in topicnames:
             sonarcount = 0
+            trycount = 0
             sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
-            dt = 3.0
-            time.sleep(dt)
+            while sonarcount == 0 and trycount<10:
+                rospy.sleep(0.2)
+                trycount += 1
             sonar_sub.unregister()
             print('  -- Sonar %d scan rate = %.2f Hz' %(i,sonarcount/dt))
             print('  -- Sonar %d frame = %s' %(i,sonarframe))
