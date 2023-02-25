@@ -149,14 +149,23 @@ def check_odom():
     r = ['/odom', 'nav_msgs/Odometry'] in topicnames
 
     if r:
-        odomcount = 0
-        odom_sub = rospy.Subscriber('odom', Odometry, odom_cb)
-        dt = 5.0
-        time.sleep(dt)
-        odom_sub.unregister()
-        odomrate = odomcount/dt
-        print('  -- Odometry rate = %.2f Hz' %(odomrate))
-        print('  -- Odometry frame = %s' %(odomframe))
+        try:
+            odom_sub = rospy.Subscriber('odom', Odometry, odom_cb)
+            odomcount = 0
+            trycount = 0
+            dt = 0.2
+            tott = 0
+            while odomcount == 0 and trycount<15:
+                rospy.sleep(dt)
+                tott += dt
+                trycount += 1
+            odom_sub.unregister()
+            odomrate = odomcount/tott
+            print('  -- Odometry rate = %.2f Hz' %(odomrate))
+            print('  -- Odometry frame = %s' %(odomframe))
+        except Exception as e:
+            print(e)    
+            r = False
 
     print_result(r)
     return odomrate
@@ -176,25 +185,32 @@ def sonar_cb(data):
 
 def check_sonar():
     global topicnames, sonarcount, sonarframe, sonarvalues, idsonar
-    r = True
+    r = False
     print('----------------------------------------')
     print('Check sonar ...')
     for i in range(0,4):
         sname = 'sonar_%d' %i
         idsonar = i
         if ['/'+sname, 'sensor_msgs/Range'] in topicnames:
-            sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
-            sonarcount = 0
-            trycount = 0
-            while sonarcount == 0 and trycount<10:
-                rospy.sleep(0.2)
-                trycount += 1
-            sonar_sub.unregister()
-            print('  -- Sonar %d scan rate = %.2f Hz' %(i,sonarcount/dt))
-            print('  -- Sonar %d frame = %s' %(i,sonarframe))
-            print('  -- Sonar %d range = %.2f' %(i,sonarvalues[i]))
-        else:
-            r = False
+            print(sname)
+            try:
+                sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
+                sonarcount = 0
+                trycount = 0
+                dt = 0.2
+                tott = 0
+                while sonarcount == 0 and trycount<5:
+                    rospy.sleep(dt)
+                    tott += dt
+                    trycount += 1
+                sonar_sub.unregister()
+                if sonarcount>0:
+                    print('  -- Sonar %d scan rate = %.2f Hz' %(i,sonarcount/tott))
+                    print('  -- Sonar %d frame = %s' %(i,sonarframe))
+                    print('  -- Sonar %d range = %.2f' %(i,sonarvalues[i]))
+                    r = True
+            except Exception as e:
+                print(e)
 
     print_result(r)
     return r

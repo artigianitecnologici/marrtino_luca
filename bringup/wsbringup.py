@@ -146,7 +146,8 @@ class MyWebSocketServer(tornado.websocket.WebSocketHandler):
         sys.stdout.flush()
 
     def waitfor(self, what, timeout):
-        time.sleep(2)
+        time.sleep(1)
+        timeout -= 1
         r = check_it(what)
         while not r and timeout>0:
             time.sleep(1)
@@ -284,7 +285,7 @@ class MyWebSocketServer(tornado.websocket.WebSocketHandler):
                 self.write_message('VALUE sonar%d %.2f' %(i,v))
                 print('  -- Sonar %d range = %.2f' %(i,v))
             self.setStatus('Idle')
-            self.checkStatus('sonar')
+            #self.checkStatus('sonar')
 
         # usbcam
         elif (message=='usbcam_start'):
