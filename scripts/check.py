@@ -192,25 +192,12 @@ def check_sonar():
         sname = 'sonar_%d' %i
         idsonar = i
         if ['/'+sname, 'sensor_msgs/Range'] in topicnames:
-            print(sname)
-            try:
-                sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
-                sonarcount = 0
-                trycount = 0
-                dt = 0.2
-                tott = 0
-                while sonarcount == 0 and trycount<5:
-                    rospy.sleep(dt)
-                    tott += dt
-                    trycount += dt
-                sonar_sub.unregister()
-                if sonarcount>0:
-                    print('  -- Sonar %d scan rate = %.2f Hz' %(i,sonarcount/tott))
-                    print('  -- Sonar %d frame = %s' %(i,sonarframe))
-                    print('  -- Sonar %d range = %.2f' %(i,sonarvalues[i]))
-                    r = True
-            except Exception as e:
-                print(e)
+            readSonarValue(i)
+            if sonarcount>0:
+                print('  -- Sonar %d scan rate = %.2f Hz' %(i,sonarcount/tott))
+                print('  -- Sonar %d frame = %s' %(i,sonarframe))
+                print('  -- Sonar %d range = %.2f' %(i,sonarvalues[i]))
+                r = True
 
     print_result(r)
     return r
@@ -224,15 +211,25 @@ def readSonarValue(i):
     global sonarvalues, idsonar, sonarcount
     idsonar = i
     sname = 'sonar_%d' %i
-    sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
-    sonarcount = 0
-    trycount = 0
-    while sonarcount == 0 and trycount<10:
-        rospy.sleep(0.2)
-        trycount += 1
-    sonar_sub.unregister()
-    return sonarvalues[i]
+    print("read "+sname)
+    try:
+        sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
+        sonarcount = 0
+        trycount = 0
+        dt = 0.2
+        tott = 0
+        while sonarcount == 0 and trycount<5:
+            rospy.sleep(dt)
+            tott += dt
+            trycount += dt
+        sonar_sub.unregister()
+    except Exception as e:
+        print(e)
 
+    if sonarcount > 0:
+        return sonarvalues[i]
+    else
+        return -1
 
 # Laser
 
