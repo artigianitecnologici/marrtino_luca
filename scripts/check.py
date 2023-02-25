@@ -178,10 +178,10 @@ idsonar = 0
 
 def sonar_cb(data):
     global sonarcount, sonarframe, sonarvalues, idsonar
-    sonarcount += 1
     sonarframe = data.header.frame_id
     r = data.range  # ??? *0.75)/0.265 #scale the value of the range in meters
     sonarvalues[idsonar] = r
+    sonarcount += 1
 
 def check_sonar():
     global topicnames, sonarcount, sonarframe, sonarvalues, idsonar
@@ -192,9 +192,8 @@ def check_sonar():
         sname = 'sonar_%d' %i
         idsonar = i
         if ['/'+sname, 'sensor_msgs/Range'] in topicnames:
-            readSonarValue(i)
+            v = readSonarValue(i)
             if sonarcount>0:
-                print('  -- Sonar %d scan rate = %.2f Hz' %(i,sonarcount/tott))
                 print('  -- Sonar %d frame = %s' %(i,sonarframe))
                 print('  -- Sonar %d range = %.2f' %(i,sonarvalues[i]))
                 r = True
@@ -251,19 +250,22 @@ def check_laser():
     laserrate = 0
     get_ROS_topics()
     r = ['/scan', 'sensor_msgs/LaserScan'] in topicnames
-    
+
     if r:
         laser_sub = rospy.Subscriber('scan', LaserScan, laser_cb)
         lasercount = 0
         trycount = 0
-        dt = 0.2
         tott = 0
+        dt = 0.5
+        rospy.sleep(dt)
+        tott += dt
+        dt = 0.2
         while lasercount == 0 and trycount<5:
             rospy.sleep(dt)
             tott += dt
             trycount += dt
         laser_sub.unregister()
-        laserrate = round(lasercount/dt,2)
+        laserrate = round(lasercount/tott,2)
         print('  -- Laser scan rate = %.2f Hz' %(laserrate))
         print('  -- Laser frame = %s' %(laserframe))
 
