@@ -280,7 +280,7 @@ class MyWebSocketServer(tornado.websocket.WebSocketHandler):
         elif (message=='read_sonars'):
             self.setStatus('Read sonars')
             for i in range(0,4):
-                v = getSonarValue(i)
+                v = readSonarValue(i)
                 self.write_message('VALUE sonar%d %.2f' %(i,v))
                 print('  -- Sonar %d range = %.2f' %(i,v))
             self.setStatus('Idle')

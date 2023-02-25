@@ -183,9 +183,9 @@ def check_sonar():
         sname = 'sonar_%d' %i
         idsonar = i
         if ['/'+sname, 'sensor_msgs/Range'] in topicnames:
+            sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
             sonarcount = 0
             trycount = 0
-            sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
             while sonarcount == 0 and trycount<10:
                 rospy.sleep(0.2)
                 trycount += 1
@@ -204,13 +204,16 @@ def getSonarValues():
     global sonarvalues
     return sonarvalues
 
-def getSonarValue(i):
-    global sonarvalues, idsonar
+def readSonarValue(i):
+    global sonarvalues, idsonar, sonarcount
     idsonar = i
     sname = 'sonar_%d' %i
     sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
-    dt = 1.5
-    time.sleep(dt)
+    sonarcount = 0
+    trycount = 0
+    while sonarcount == 0 and trycount<10:
+        rospy.sleep(0.2)
+        trycount += 1
     sonar_sub.unregister()
     return sonarvalues[i]
 
