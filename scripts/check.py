@@ -171,7 +171,7 @@ def check_odom():
             r = False
 
     print_result(r)
-    return odomrate
+    return r #odomrate
 
 
 sonarcount = 0
@@ -268,12 +268,15 @@ def check_laser():
             tott += dt
             trycount += dt
         laser_sub.unregister()
-        laserrate = round(lasercount/tott,2)
-        print('  -- Laser scan rate = %.2f Hz' %(laserrate))
-        print('  -- Laser frame = %s' %(laserframe))
+        if lasercount>0:
+            laserrate = round(lasercount/tott,2)
+            print('  -- Laser scan rate = %.2f Hz' %(laserrate))
+            print('  -- Laser frame = %s' %(laserframe))
+        else:
+            r = False
 
     print_result(r)
-    return laserrate
+    return r # laserrate
 
 
 cameracount = 0
