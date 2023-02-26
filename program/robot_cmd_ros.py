@@ -833,6 +833,9 @@ def ready():
 
 
 # check if program can run now
+def ok():
+    return marrtinoOK()
+
 def marrtino_ok():
     return marrtinoOK()
 

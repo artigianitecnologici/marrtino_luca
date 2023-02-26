@@ -54,6 +54,8 @@ sleep 10
 
 echo "Docker containers running:"
 docker ps --format '{{.Names}}' > $HOME/log/dockerps
+cat $HOME/log/dockerps
+
 
 echo "Done"
 

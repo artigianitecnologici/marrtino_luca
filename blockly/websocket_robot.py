@@ -7,6 +7,7 @@ import sys, os, socket, time, random
 from datetime import datetime
 import thread2
 #from thread2 import Thread
+from threading import Lock
 from numbers import Number
 
 RED   = "\033[1;31m"  
@@ -108,13 +109,20 @@ class MyWebSocketServer(tornado.websocket.WebSocketHandler):
         return True
 
 
+# lock for ws writing
+ws_write_lock = Lock()
+
+
 # function to be called by programs to display text on web interface
 def display(text, ws=None):
+
     global websocket_server, list_ws
     if ws!=None:
         try:
             #print('  -- writing on websocket: %s' %text)
+            ws_write_lock.acquire()
             ws.write_message('display %s' %text)
+            ws_write_lock.release()
         except tornado.websocket.WebSocketClosedError:
             print('Cannot write on websocket')
         except Exception as e:
@@ -133,13 +141,18 @@ def main_loop(data):
         if (run and not websocket_server is None):
             for ws in list_ws:
                 try:
+                    ws_write_lock.acquire()
                     ws.write_message(status)
+                    ws_write_lock.release()
                     rospy.sleep(0.1)
                     #print(status)
                 except tornado.websocket.WebSocketClosedError:
                     #print('Connection closed.')
                     #websocket_server = None
                     pass
+                except BufferError as e:
+                    print("BufferError in Main loop: status=%s" %status)
+                    print(e)
                 except Exception as e:
                     print("ERROR in Main loop")
                     print(e)
