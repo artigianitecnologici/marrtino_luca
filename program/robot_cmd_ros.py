@@ -647,6 +647,7 @@ sub_image = None
 
 def startCameraGrabber():
     global sub_image, cvimage
+    cvimage = None
     img_topic = autoImageTopic()
     if img_topic is not None:
         print("Image topic: %s" %img_topic)
