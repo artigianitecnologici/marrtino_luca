@@ -6,7 +6,8 @@ from __future__ import division
 import sys, os, socket, time, random
 from datetime import datetime
 import thread2
-#from thread2 import Thread
+from thread2 import Thread
+from threading import Lock
 from numbers import Number
 
 RED   = "\033[1;31m"  
@@ -82,7 +83,7 @@ class MyWebSocketServer(tornado.websocket.WebSocketHandler):
             print('Code received\n')
             save_program(message)
             if (status=='Idle'):
-                self.run_thread = thread2.Thread(target=run_code, args=(message,))
+                self.run_thread = Thread(target=run_code, args=(message,))
                 self.run_thread.start()
             else:
                 print('Program running. This code is discarded.')
@@ -108,44 +109,73 @@ class MyWebSocketServer(tornado.websocket.WebSocketHandler):
         return True
 
 
+# lock for ws writing
+ws_write_lock = Lock()
+
+
 # function to be called by programs to display text on web interface
 def display(text, ws=None):
-    global websocket_server, list_ws
+
+    global status, websocket_server, list_ws
+
+    if status=="Stop":
+        return
+
     if ws!=None:
         try:
             #print('  -- writing on websocket: %s' %text)
+            ws_write_lock.acquire()
             ws.write_message('display %s' %text)
         except tornado.websocket.WebSocketClosedError:
             print('Cannot write on websocket')
         except Exception as e:
             print('Error when writing on websocket')
             print(e)
+        finally:
+            #print('display lock released')
+            if ws_write_lock.locked():
+                ws_write_lock.release()
     else:
         for ws in list_ws:
             display(text,ws)
 
 # Main loop (asynchrounous thread)
 
+main_loop_thread = None
+
 def main_loop(data):
     global run, websocket_server, status, list_ws
+    last_status = ""
     while (run):
         time.sleep(1)
+        #print('main loop...')
         if (run and not websocket_server is None):
             for ws in list_ws:
                 try:
-                    ws.write_message(status)
-                    rospy.sleep(0.1)
-                    #print(status)
-                except tornado.websocket.WebSocketClosedError:
+                    #print("ws writing status %s..." %status)
+                    if status != last_status:
+                        ws_write_lock.acquire()
+                        ws.write_message(status)
+                        rospy.sleep(0.1)
+                        last_status = status
+                    #print("ws write status %s DONE" %status)
+                except tornado.websocket.WebSocketClosedError as e:
                     #print('Connection closed.')
                     #websocket_server = None
-                    pass
+                    print(e)
+                except BufferError as e:
+                    print("BufferError in Main loop: status=%s" %status)
+                    print(e)
                 except Exception as e:
                     print("ERROR in Main loop")
                     print(e)
                     ioloop = tornado.ioloop.IOLoop.instance()
                     ioloop.add_callback(ioloop.stop)
                     run=False
+                finally:
+                    #print('main-loop lock released')
+                    if ws_write_lock.locked():
+                        ws_write_lock.release()
     print("Main loop quit.")
 
 
@@ -161,6 +191,7 @@ def deffunctioncode(code):
     r = "global fncode\n"
     r = r+"def fncode():\n"
     r = r+"  begin()\n"
+    r = r+"  try:\n"
     v = code.split("\n")
     #incode = False
     for i in v:
@@ -174,7 +205,11 @@ def deffunctioncode(code):
             #incode = False
         #elif (incode):
         else:
-            r = r+'  '+i+'\n'
+            r = r+'    '+i+'\n'
+    r = r+"  except Exception as e:\n"
+    r = r+"    print('!!! function thread exception !!!')\n"
+    r = r+"    print(e)\n"
+    r = r+"    display(e)\n"
     r = r+"  end()\n"
     return r
 
@@ -195,7 +230,8 @@ def fncodeexcept():
 run_code_thread = None
 
 def exec_thread(code):
-    global run_code_thread
+    global run_code_thread, main_loop_thread 
+
     fncodestr = deffunctioncode(code)
     #print(len(fncodestr))
     #print(fncodestr)
@@ -234,11 +270,14 @@ def exec_thread(code):
                 print('Terminating code ...')
                 run_code_thread.terminate()
                 #print "Run code thread: ", run_code_thread," terminated."
+                time.sleep(1)
+                end()
             except Exception as e:
                 print("ERROR in Thread termination")
                 print(e)
     run_code_thread.join()
-    run_code_thread = None    
+    run_code_thread = None
+    print("Run code thread joined")
 
 
 def save_program(code):
@@ -277,8 +316,8 @@ if __name__ == "__main__":
     os.system('mkdir -p %s' %logdir)
 
     # Run main thread
-    t = Thread(target=main_loop, args=(None,))
-    t.start()
+    main_loop_thread = thread2.Thread(target=main_loop, args=(None,))
+    main_loop_thread.start()
 
     # Run robot
     begin('websocket_robot')
@@ -305,7 +344,7 @@ if __name__ == "__main__":
     print("Web server quit.")
     run = False    
     print("Waiting for main loop to quit...")
-    t.join()
+    main_loop_thread.join()
 
 
 #    if run_code_thread != None:

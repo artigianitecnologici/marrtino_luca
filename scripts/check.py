@@ -149,17 +149,29 @@ def check_odom():
     r = ['/odom', 'nav_msgs/Odometry'] in topicnames
 
     if r:
-        odomcount = 0
-        odom_sub = rospy.Subscriber('odom', Odometry, odom_cb)
-        dt = 5.0
-        time.sleep(dt)
-        odom_sub.unregister()
-        odomrate = odomcount/dt
-        print('  -- Odometry rate = %.2f Hz' %(odomrate))
-        print('  -- Odometry frame = %s' %(odomframe))
+        try:
+            odom_sub = rospy.Subscriber('odom', Odometry, odom_cb)
+            odomcount = 0
+            trycount = 0
+            tott = 0
+            dt = 1.0
+            rospy.sleep(dt)
+            tott += dt
+            dt = 0.2
+            while odomcount == 0 and trycount<5:
+                rospy.sleep(dt)
+                tott += dt
+                trycount += dt
+            odom_sub.unregister()
+            odomrate = round(odomcount/tott,2)
+            print('  -- Odometry rate = %.2f Hz' %(odomrate))
+            print('  -- Odometry frame = %s' %(odomframe))
+        except Exception as e:
+            print(e)    
+            r = False
 
     print_result(r)
-    return odomrate
+    return r #odomrate
 
 
 sonarcount = 0
@@ -168,31 +180,26 @@ sonarvalues = [0,0,0,0,0,0,0,0]
 idsonar = 0
 
 def sonar_cb(data):
-    global sonarcount, sonarframe, idsonar
-    sonarcount += 1
+    global sonarcount, sonarframe, sonarvalues, idsonar
     sonarframe = data.header.frame_id
-    r = (data.range*0.75)/0.265 #scale the value of the range in meters
+    r = data.range  # ??? *0.75)/0.265 #scale the value of the range in meters
     sonarvalues[idsonar] = r
+    sonarcount += 1
 
 def check_sonar():
     global topicnames, sonarcount, sonarframe, sonarvalues, idsonar
-    r = True
+    r = False
     print('----------------------------------------')
     print('Check sonar ...')
     for i in range(0,4):
         sname = 'sonar_%d' %i
         idsonar = i
         if ['/'+sname, 'sensor_msgs/Range'] in topicnames:
-            sonarcount = 0
-            sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
-            dt = 3.0
-            time.sleep(dt)
-            sonar_sub.unregister()
-            print('  -- Sonar %d scan rate = %.2f Hz' %(i,sonarcount/dt))
-            print('  -- Sonar %d frame = %s' %(i,sonarframe))
-            print('  -- Sonar %d range = %.2f' %(i,sonarvalues[i]))
-        else:
-            r = False
+            v = readSonarValue(i)
+            if sonarcount>0:
+                print('  -- Sonar %d frame = %s' %(i,sonarframe))
+                print('  -- Sonar %d range = %.2f' %(i,sonarvalues[i]))
+                r = True
 
     print_result(r)
     return r
@@ -202,16 +209,29 @@ def getSonarValues():
     global sonarvalues
     return sonarvalues
 
-def getSonarValue(i):
-    global sonarvalues, idsonar
+def readSonarValue(i):
+    global sonarvalues, idsonar, sonarcount
     idsonar = i
     sname = 'sonar_%d' %i
-    sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
-    dt = 1.5
-    time.sleep(dt)
-    sonar_sub.unregister()
-    return sonarvalues[i]
+    print("read "+sname)
+    try:
+        sonar_sub = rospy.Subscriber(sname, Range, sonar_cb)
+        sonarcount = 0
+        trycount = 0
+        dt = 0.2
+        tott = 0
+        while sonarcount == 0 and trycount<5:
+            rospy.sleep(dt)
+            tott += dt
+            trycount += dt
+        sonar_sub.unregister()
+    except Exception as e:
+        print(e)
 
+    if sonarcount > 0:
+        return sonarvalues[i]
+    else:
+        return -1
 
 # Laser
 
@@ -233,19 +253,30 @@ def check_laser():
     laserrate = 0
     get_ROS_topics()
     r = ['/scan', 'sensor_msgs/LaserScan'] in topicnames
-    
+
     if r:
-        lasercount = 0
         laser_sub = rospy.Subscriber('scan', LaserScan, laser_cb)
-        dt = 5.0
-        time.sleep(dt)
+        lasercount = 0
+        trycount = 0
+        tott = 0
+        dt = 1.0
+        rospy.sleep(dt)
+        tott += dt
+        dt = 0.2
+        while lasercount == 0 and trycount<5:
+            rospy.sleep(dt)
+            tott += dt
+            trycount += dt
         laser_sub.unregister()
-        laserrate = lasercount/dt
-        print('  -- Laser scan rate = %.2f Hz' %(laserrate))
-        print('  -- Laser frame = %s' %(laserframe))
+        if lasercount>0:
+            laserrate = round(lasercount/tott,2)
+            print('  -- Laser scan rate = %.2f Hz' %(laserrate))
+            print('  -- Laser frame = %s' %(laserframe))
+        else:
+            r = False
 
     print_result(r)
-    return laserrate
+    return r # laserrate
 
 
 cameracount = 0

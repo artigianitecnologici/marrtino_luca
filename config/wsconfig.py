@@ -81,6 +81,7 @@ class MyWebSocketServer(tornado.websocket.WebSocketHandler):
         self.write_message('VALUE marrtino_hwinfo %s' %self.getMARRtinoHWInfo()) 
         self.write_message('VALUE marrtino_version %s' %self.getMARRtinoVersion())
         self.write_message('VALUE marrtino_apps_version %s' %self.getMARRtinoAppVersion())
+        self.write_message('VALUE running_docker %s' %self.getRunningDocker())
         self.setStatus('Idle')
 
 
@@ -252,7 +253,18 @@ class MyWebSocketServer(tornado.websocket.WebSocketHandler):
         return v
 
 
-
+    def getRunningDocker(self):
+        try:
+            f = open(os.getenv("HOME")+'/log/dockerps','r')  # written by start_docker.bash
+            r = ""
+            l = f.readline()
+            while l != "":
+                r += l.strip()+" "
+                l = f.readline()
+        except Exception as e:
+            r = "--"
+            print(e)
+        return r
 
     def on_message(self, message):
         global code, status

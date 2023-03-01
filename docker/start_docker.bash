@@ -42,11 +42,7 @@ if [ -f /tmp/marrtinosocialon ] && [ "$MARRTINO_SOCIAL" != "" ]; then
 
 fi
 
-sleep 10
-
-docker ps
-
-#echo "docker containers started: check with 'tmux a -t :0' or 'docker ps' ..."
+sleep 15
 
 
 echo "Autostart..."
@@ -54,7 +50,12 @@ echo "Autostart..."
 tmux send-keys -t $SESSION:4 "cd \$MARRTINO_APPS_HOME/start" C-m
 tmux send-keys -t $SESSION:4 "sleep 60 && python3 autostart.py " C-m
 
-sleep 5
+sleep 10
+
+echo "Docker containers running:"
+docker ps --format '{{.Names}}' > $HOME/log/dockerps
+cat $HOME/log/dockerps
+
 
 echo "Done"
 

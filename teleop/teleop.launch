@@ -3,6 +3,9 @@
 	<arg name="use_4wd" default="false" />  <!-- 4WD robot control -->
 	<arg name="cmdvel" default="cmd_vel" if="$(eval env('ROBOT_TYPE') != 'turtlebot')" />  <!-- use joystick_cmd_vel if gbn active -->
 	<arg name="cmdvel" default="cmd_vel_mux/input/teleop" if="$(eval env('ROBOT_TYPE') == 'turtlebot')" />  <!-- turtlebot -->
+    <arg name="max_vel_x" default="0.2" />
+    <arg name="max_vel_th" default="0.5" />
+ 
 
     <!-- keyboard -->
 	<group unless="$(arg use_joystick)">
@@ -18,15 +21,15 @@
 		  <param name="deadzone" value="0.12" />
 	    </node>
 
-      <group unless="$(arg use_4wd)">
-	    <node pkg="gradient_based_navigation" type="joystick_control" name="joystick" output="screen">
-		  <remap from="joystick_cmd_vel" to="$(arg cmdvel)" />
-		  <param name="max_vel_x" value="0.2" />
-		  <param name="max_vel_th" value="0.5" />
-		</node>
-  	  </group>
+        <group unless="$(arg use_4wd)">
+          <node pkg="gradient_based_navigation" type="joystick_control" name="joystick" output="screen">
+		    <remap from="joystick_cmd_vel" to="$(arg cmdvel)" />
+		    <param name="max_vel_x" value="$(arg max_vel_x)" />
+		    <param name="max_vel_th" value="$(arg max_vel_th)" />
+          </node>
+        </group>
 
-	</group>
+    </group>
 		
 </launch>
 

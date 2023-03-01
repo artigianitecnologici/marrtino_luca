@@ -105,6 +105,12 @@
 <td>MARRtino Apps version </td>
 <td> <div id="marrtino_apps_version" style="color: blue;" ></div> </td>
 </tr>
+
+<tr>
+<td>Running docker containers </td>
+<td> <div id="running_docker" style="color: blue;" ></div> </td>
+</tr>
+
 </table>
 
 <p>
@@ -208,6 +214,12 @@ Confirm and enter password (<tt style="font-size:120%;">marrtino</tt>) when aske
 <hr>
 
 <h2>System restart (version 4.x)</h2>
+
+<p>Option 1
+
+<button id="btn_dockerrestart" onclick="send_cmd('docker_restart')" class="btn waves-effect waves-light blue" style="margin-right:10px">docker restart</button>
+
+<p>Option 2
 
 <ol>
 <li> Open a terminal or access through
